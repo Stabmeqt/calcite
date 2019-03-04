@@ -1801,6 +1801,9 @@ public class SqlStdOperatorTable extends ReflectiveSqlOperatorTable {
   /** The <code>TIMESTAMPADD</code> function. */
   public static final SqlFunction TIMESTAMP_ADD = new SqlTimestampAddFunction();
 
+  /** The <code>TO_TIMESTAMP</code> function. */
+  public static final SqlFunction TO_TIMESTAMP = new SqlToTimestampFunction();
+
   /** The <code>TIMESTAMPDIFF</code> function. */
   public static final SqlFunction TIMESTAMP_DIFF = new SqlTimestampDiffFunction();
 

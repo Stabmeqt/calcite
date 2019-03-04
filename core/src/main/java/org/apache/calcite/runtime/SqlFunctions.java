@@ -59,7 +59,9 @@ import java.math.MathContext;
 import java.math.RoundingMode;
 import java.sql.SQLException;
 import java.sql.Timestamp;
+import java.text.DateFormat;
 import java.text.DecimalFormat;
+import java.text.ParsePosition;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -1749,6 +1751,16 @@ public class SqlFunctions {
 
   public static java.sql.Timestamp internalToTimestamp(Long v) {
     return v == null ? null : internalToTimestamp(v.longValue());
+  }
+
+  public static long regexStringToTimestamp(String v, String pattern) {
+    final DateFormat dateFormat = DateTimeUtils.newDateFormat(pattern);
+    final Date parsedDate = dateFormat.parse(v, new ParsePosition(0));
+    return DateTimeUtils.timestampStringToUnixDate(dateFormat.format(parsedDate));
+  }
+
+  public static long regexStringToTimestamp(String v) {
+    return DateTimeUtils.timestampStringToUnixDate(v);
   }
 
   public static int timestampWithLocalTimeZoneToDate(long v, TimeZone timeZone) {

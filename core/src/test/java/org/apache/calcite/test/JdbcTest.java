@@ -5568,6 +5568,49 @@ public class JdbcTest {
     connection.close();
   }
 
+  /** GMT+3 is tested to ensure predictable timestamp value.
+   * Otherwise result will differ depending on the time zone of the tester */
+  @Test public void testToTimestamp() {
+    final TimeZone tzGmt03 = TimeZone.getTimeZone("GMT+3:00"); // +0300 always
+    TimeZone.setDefault(tzGmt03);
+    CalciteAssert.that()
+        .with(CalciteConnectionProperty.TIME_ZONE, "GMT+3:00")
+        .query("select TO_TIMESTAMP('2017-03-31 9:30:20.55','yyyy-MM-dd hh:mm:ss.SS')")
+        .returns(resultSet -> {
+          try {
+            assertTrue(resultSet.next());
+            final Timestamp timestamp = resultSet.getTimestamp(1);
+            assertFalse(resultSet.next());
+            assertEquals(Timestamp.valueOf("2017-03-31 09:30:20.55"), timestamp);
+          } catch (SQLException e) {
+            throw new RuntimeException(e);
+          }
+        });
+    TimeZone.setDefault(null);
+  }
+
+  /** GMT+3 is tested to ensure predictable timestamp value.
+   * Otherwise result will differ depending on the time zone of the tester
+   * No time format is specified */
+  @Test public void testToTimestampWithoutFormat() {
+    final TimeZone tzGmt03 = TimeZone.getTimeZone("GMT+03"); // +0300 always
+    TimeZone.setDefault(tzGmt03);
+    CalciteAssert.that()
+         .with(CalciteConnectionProperty.TIME_ZONE, "GMT+3:00")
+         .query("select TO_TIMESTAMP('2017-03-31 9:30:20')")
+         .returns(resultSet -> {
+           try {
+             assertTrue(resultSet.next());
+             final Timestamp timestamp = resultSet.getTimestamp(1);
+             assertFalse(resultSet.next());
+             assertEquals(Timestamp.valueOf("2017-03-31 09:30:20.0"), timestamp);
+           } catch (SQLException e) {
+             throw new RuntimeException(e);
+           }
+         });
+    TimeZone.setDefault(null);
+  }
+
   /** Tests that CURRENT_TIMESTAMP gives different values each time a statement
    * is executed. */
   @Test public void testCurrentTimestamp() throws Exception {

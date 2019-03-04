@@ -53,6 +53,9 @@ other software versions as specified in `pom.xml`.
 
 #### New features
 
+* [<a href="https://issues.apache.org/jira/browse/CALCITE-759">CALCITE-759</a>]
+  Implement `TO_TIMESTAMP` SQL function
+  (Julian Hyde)
 * [<a href="https://issues.apache.org/jira/browse/CALCITE-2662">CALCITE-2662</a>]
   In `Planner`, allow parsing a stream (`Reader`) instead of a `String`
   (Enrico Olivelli)

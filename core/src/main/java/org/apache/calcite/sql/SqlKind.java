@@ -450,6 +450,11 @@ public enum SqlKind {
    */
   TIMESTAMP_DIFF,
 
+  /**
+   * The "TO_TIMESTAMP" function
+  */
+  TO_TIMESTAMP,
+
   // prefix operators
 
   /**

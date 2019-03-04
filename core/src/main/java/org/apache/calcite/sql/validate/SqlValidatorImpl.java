@@ -1704,11 +1704,19 @@ public class SqlValidatorImpl implements SqlValidatorWithHints {
       SqlFunction fun = (SqlFunction) overloads.get(0);
       if ((fun.getSqlIdentifier() == null)
           && (fun.getSyntax() != SqlSyntax.FUNCTION_ID)) {
-        final int expectedArgCount =
+        final int expectedMinArgCount =
             fun.getOperandCountRange().getMin();
-        throw newValidationError(call,
-            RESOURCE.invalidArgCount(call.getOperator().getName(),
-                expectedArgCount));
+        final int expectedMaxArgCount =
+            fun.getOperandCountRange().getMax();
+        Resources.ExInst<SqlValidatorException> exc;
+        final String opName = call.getOperator().getName();
+        if (expectedMinArgCount >= expectedMaxArgCount) {
+          exc = RESOURCE.invalidArgCount(opName,
+                    expectedMinArgCount);
+        } else {
+          exc = RESOURCE.invalidArgRange(opName, expectedMinArgCount, expectedMaxArgCount);
+        }
+        throw newValidationError(call, exc);
       }
     }
 

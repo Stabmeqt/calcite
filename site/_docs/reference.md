@@ -1475,6 +1475,7 @@ Not implemented:
 | {fn SECOND(date)} | Equivalent to `EXTRACT(SECOND FROM date)`. Returns an integer between 0 and 59.
 | {fn TIMESTAMPADD(timeUnit, count, datetime)} | Adds an interval of *count* *timeUnit*s to a datetime
 | {fn TIMESTAMPDIFF(timeUnit, timestamp1, timestamp2)} | Subtracts *timestamp1* from *timestamp2* and returns the result in *timeUnit*s
+| {fn TO_TIMESTAMP (string date, [string pattern]) } | Converts a string to a timestamp according to the specified format
 
 Not implemented:
 

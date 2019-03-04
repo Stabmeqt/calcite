@@ -68,6 +68,7 @@ import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -82,7 +83,9 @@ import java.util.regex.Pattern;
 
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import static org.junit.Assume.assumeTrue;
 
@@ -1911,6 +1914,19 @@ public abstract class SqlOperatorBaseTest {
     tester.checkScalar("{fn UCASE('xxx')}", "XXX", "CHAR(3) NOT NULL");
 
     // Time and Date Functions
+    final String expression =
+            "select {fn TO_TIMESTAMP('2017-03-31 9:30:20.55','yyyy-MM-dd hh:mm:ss.SS')}";
+    final SqlTester.TypeChecker typeChecker = type -> {
+      final SqlTypeName sqlTypeName = type.getSqlTypeName();
+      assertEquals(SqlTypeName.TIMESTAMP, sqlTypeName);
+    };
+    SqlTester.ParameterChecker checker = parameterRowType -> {
+      final SqlTypeName sqlTypeName = parameterRowType.getSqlTypeName();
+      assertEquals(SqlTypeName.ROW, sqlTypeName);
+    };
+    tester.check(expression, typeChecker, checker,
+            timestampResultChecker("2017-03-31 09:30:20.55"));
+
     tester.checkType("{fn CURDATE()}", "DATE NOT NULL");
     tester.checkType("{fn CURTIME()}", "TIME(0) NOT NULL");
     if (false) {
@@ -7093,6 +7109,47 @@ public abstract class SqlOperatorBaseTest {
         "timestampdiff(DAY, date '2016-06-15', cast(null as date))",
         null,
         "INTEGER");
+  }
+
+  @Test public void testToTimestamp() {
+    tester.setFor(SqlStdOperatorTable.TO_TIMESTAMP);
+    tester.checkType(
+        "to_timestamp('2017-03-31 9:30:20')",
+        "TIMESTAMP(0) NOT NULL");
+    tester.checkType(
+        "to_timestamp('2017-03-31 9:30:20.55','yyyy-MM-dd hh:mm:ss.SS')",
+        "TIMESTAMP(0) NOT NULL");
+    tester.check(
+        "select to_timestamp('2017-03-31 9:30:20')",
+        SqlTests.ANY_TYPE_CHECKER,
+        SqlTests.ANY_PARAMETER_CHECKER,
+        timestampResultChecker("2017-03-31 09:30:20.0"));
+    tester.check(
+        "select to_timestamp('2017-03-31 9:30:20.55','yyyy-MM-dd hh:mm:ss.SS')",
+        SqlTests.ANY_TYPE_CHECKER,
+        SqlTests.ANY_PARAMETER_CHECKER,
+        timestampResultChecker("2017-03-31 09:30:20.55"));
+    tester.checkFails(
+        "^to_timestamp()^",
+        "Invalid number of arguments to function 'TO_TIMESTAMP'. Was expecting from 1 to 2 arguments",
+        false);
+    tester.checkFails(
+        "^to_timestamp('arg1', 'arg2', 'arg3')^",
+        "Invalid number of arguments to function 'TO_TIMESTAMP'. Was expecting from 1 to 2 arguments",
+        false);
+  }
+
+  /**
+   * Result checker that considers a test to have succeeded if the resulting
+   * timestamp directly matches expected timestamp, created from a string
+  */
+  protected static SqlTester.ResultChecker timestampResultChecker(final String expected) {
+    return result -> {
+      assertTrue(result.next());
+      final Timestamp timestamp = result.getTimestamp(1);
+      assertFalse(result.next());
+      assertEquals(Timestamp.valueOf(expected), timestamp);
+    };
   }
 
   @Test public void testDenseRankFunc() {

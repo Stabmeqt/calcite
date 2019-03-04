@@ -120,6 +120,10 @@ public interface CalciteResource {
   @BaseMessage("Invalid number of arguments to function ''{0}''. Was expecting {1,number,#} arguments")
   ExInst<SqlValidatorException> invalidArgCount(String a0, int a1);
 
+  @BaseMessage("Invalid number of arguments to function ''{0}''. Was expecting from {1,number,#} to {2,number,#} "
+        + "arguments")
+  ExInst<SqlValidatorException> invalidArgRange(String a0, int a1, int a2);
+
   @BaseMessage("At line {0,number,#}, column {1,number,#}")
   ExInstWithCause<CalciteContextException> validatorContextPoint(int a0,
       int a1);
